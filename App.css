@@ -1,0 +1,17 @@
+html {
+  font-family: Arial;
+}
+
+.header {
+  font-size: 30px;
+  font-weight: 600;
+  font-family: Apple Chancery;
+}
+
+.website-headshot {
+  position: absolute;
+  width: 20vw;
+  height: auto;
+  top: 0vh;
+  right: 1vh;
+}
