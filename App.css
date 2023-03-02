@@ -1,17 +1,107 @@
 html {
-  font-family: Arial;
+  font-family: Optima, sans-serif;
+  --primary-color: #367300;
+}
+
+body {
+  padding-inline: 30%;
+}
+
+.navbar {
+  margin-top: 4vh;
+  border-bottom: 2px solid grey;
+  padding-bottom: 3vh;
+  margin-bottom: 2vh;
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
 }
 
 .header {
   font-size: 30px;
   font-weight: 600;
-  font-family: Apple Chancery;
+  color: black;
+  margin-right: 3%;
+  text-decoration: none;
 }
 
-.website-headshot {
-  position: absolute;
-  width: 20vw;
+.navbar-icon {
+  width: 50px;
   height: auto;
-  top: 0vh;
-  right: 1vh;
+  margin-left: 3%;
+  margin-inline-end: 0;
+}
+
+.navbar-link {
+  margin-inline: auto;
+  font-size: 16px;
+  font-weight: 600;
+  color: black;
+  text-decoration: none;
+  transition: 0.3s;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: inline-block;
+  padding-top: 5px;
+  padding-bottom: 0px;
+  position: relative;
+}
+
+a, .navbar-link:hover {
+  color: var(--primary-color);
+}
+
+.navbar-link::after {
+  background: none repeat scroll 0 0 transparent;
+  bottom: 0;
+  content: "";
+  display: block;
+  height: 2px;
+  left: 50%;
+  position: absolute;
+  background: var(--primary-color);
+  transition: width 0.3s ease 0s, left 0.3s ease 0s;
+  width: 0;
+}
+
+.navbar-link:hover {
+  text-decoration: none;
+}
+
+.navbar-link:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+.page-title {
+  font-size: 30px;
+  font-weight: 600;
+  text-align: left;
+  margin-bottom: 4vh;
+}
+
+.home-intro {
+  display: flex;
+}
+
+.content {
+}
+
+.list-link {
+  margin-top: 10px;
+}
+
+.home-footer {
+  display: grid;
+  margin-top: 5vh;
+  padding-top: 5vh;
+  border-top: 2px solid grey;
+}
+
+.footer-headshot {
+  width: 170px;
+  height: auto;
+  margin-inline: auto;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
 }
