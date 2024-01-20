@@ -28,7 +28,7 @@ body {
 .navbar-icon {
   width: 50px;
   height: auto;
-  margin-left: 3%;
+  margin-left: auto;
   margin-inline-end: 0;
 }
 
@@ -87,15 +87,18 @@ a, .navbar-link:hover {
 .content {
 }
 
-.list-link {
+li {
   margin-top: 10px;
+}
+
+.list-link {
+  margin-top: 5px;
+  margin-left: 20px;
+  list-style-type: circle;
 }
 
 .home-footer {
   display: grid;
-  margin-top: 5vh;
-  padding-top: 5vh;
-  border-top: 2px solid grey;
 }
 
 .footer-headshot {
