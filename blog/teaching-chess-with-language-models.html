@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-KT6DCVDD82"></script>
+        <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', 'G-KT6DCVDD82');
+            </script>
+        <title>Teaching Chess with Language Models — Preston Yadegar</title>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="../App.css"/>
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
+        <meta name="language" content="en">
+        <meta name="country" content="us">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Why large language models struggle with chess, and how to get them to explain positions a student can actually learn from.">
+        <link rel="canonical" href="https://prestonyadegar.github.io/blog/teaching-chess-with-language-models.html"/>
+        <meta name="robots" content="index, follow">
+        <meta property="og:site_name" content="Preston Yadegar"/>
+        <meta property="og:title" content="Teaching Chess with Language Models"/>
+        <meta property="og:url" content="https://prestonyadegar.github.io/blog/teaching-chess-with-language-models.html"/>
+        <meta property="og:type" content="article"/>
+        <meta property="og:description" content="Why large language models struggle with chess, and how to get them to explain positions a student can actually learn from."/>
+    </head>
+    <body>
+        <nav class="navbar">
+            <a class="header" href="../">
+                Preston Yadegar
+            </a>
+            <a class="navbar-link" href="../blog/">Writing</a>
+            <img src="../assets/favicon.png" class="navbar-icon" alt="Colored Website Icon"/>
+        </nav>
+        <div class="content">
+            <article class="post">
+                <h1 class="page-title">Teaching Chess with Language Models</h1>
+
+                <p>
+                    I recently built a <a href="https://github.com/PrestonYadegar/chess-coach" target="_blank" rel="noopener">Chess Learning platform</a>
+                    as part of my journey to achieve an Expert level FIDE ranking. The tool (entirely open-source and local, meant for personal
+                    use) is fairly straightforward: sync your games from Chess.com, run them through an engine, and identify your recurring
+                    mistakes. In working on this project I came across an interesting problem: getting an LLM to explain <em>why</em> a particular
+                    move in chess is good or bad.
+                </p>
+
+                <p>
+                    Modern engines (Stockfish, AlphaZero, Leela, etc.) have essentially solved chess evaluation; they will tell you the ~best move
+                    in any position. As a semi-lazy but decent human player (~2000 rating), I find engines to be useful, but not quite as useful as
+                    a conceptual explanation. Chess books offer some of the guidance I seek but they're unpersonalized and much harder to apply
+                    without dedicated study. I'm also not interested in finding a coach at this time. An eval line alone isn't helpful instruction
+                    for a student seeking to understand what strategy is appropriate for a given situation and why a move is favorable or not. On
+                    the surface this appears to be a mere language problem which LLMs should be able to tackle.
+                </p>
+
+                <h2>The wrong tool for the job</h2>
+
+                <p>
+                    After doing some digging, I found broad agreement that
+                    <a href="https://arxiv.org/abs/2512.01992" target="_blank" rel="noopener">LLMs cannot play chess well</a>. Frontier models
+                    routinely make illegal moves and fail to correctly assess even basic positions. Benchmarks from 2025 found o3 making illegal
+                    moves in 87.5% of games and o4-mini in 94.3% —
+                    <a href="https://blog.mathieuacher.com/GPTReasoningO3O4miniAndChess-copy/" target="_blank" rel="noopener">worse than
+                    GPT-3.5-turbo-instruct on raw legality</a>. Larger thinking budgets don't close the gap, suggesting the limitation is not simply
+                    a matter of compute.
+                </p>
+
+                <p>
+                    The failure doesn't appear to be architectural either.
+                    <a href="https://adamkarvonen.github.io/machine_learning/2024/01/03/chess-world-models.html" target="_blank" rel="noopener">Additional
+                    research by Adam Karvonen</a> shows that a 50M-parameter GPT trained on human games (from Lichess) can reach ~1500 Elo and
+                    develop a coherent internal board state.
+                </p>
+
+                <p>
+                    But using an LLM to play chess strikes me as the wrong framing to begin with, given that evaluation is already "solved". The
+                    interesting question isn't whether LLMs can compete with purpose-built engines (they can't) but whether they <em>can</em> do
+                    something that engines are incapable of: explaining a position in terms which a student can learn from.
+                </p>
+
+                <h2>Why it's still hard</h2>
+
+                <p>
+                    If LLMs are bad at playing chess, the obvious solution is to pair the model with an engine. In the simplest form, provide the
+                    engine's top line to the model and have it explain. This fails in a specific way: the model receives the what but not the how.
+                    It may know that e4 is +0.3 and what subsequent moves are to follow, but the model lacks visibility into all of the branches that
+                    the engine explored to reach that conclusion. It also has no sense of what state each continuation leads to, and no framework for
+                    translating an eval score into a concept a student can act on.
+                </p>
+
+                <p>
+                    A naive input representation can also compound this. Raw PGN and FEN notation are not natural inputs for a language model, and
+                    force the model to do significant inferential work to reconstruct what's on the board (e.g. whether pieces are pinned, a mating
+                    net is being set up) before it can actually reason about the position. This is a different failure mode than "the model doesn't
+                    know chess."
+                </p>
+
+                <h2>Bridging the gap</h2>
+
+                <p>
+                    A chess-trained model learns to build a board representation on its own, whereas an off-the-shelf model needs us to hand it one.
+                    In my own exploration, these techniques noticeably improved how accurately LLMs reasoned about positions:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Supplement FEN with explicit piece lists.</strong> Rather than asking the model to parse FEN notation, I generated a
+                        plaintext piece list (<code>White: King(e1), Queen(d1)...</code>), annotated each move with from→to squares, and labeled
+                        captures with the piece taken (e.g. <code>cxd3 (×Rook)</code>). The model never has to infer what's on a square.
+                    </li>
+                    <li>
+                        <strong>Pass multiple evaluations as ground truth.</strong> The LLM explains what the engine found rather than exploring or
+                        evaluating for itself. Providing additional lines can also help the model understand some of the tensions in the position.
+                    </li>
+                    <li>
+                        <strong>Inject strategic principles.</strong> I drew on Karpov's
+                        <a href="https://books.google.com/books/about/Find_the_Right_Plan_with_Anatoly_Karpov.html?id=kksmEAAAQBAJ&amp;source=kp_book_description" target="_blank" rel="noopener">Find
+                        the Right Plan</a> to give the model some specific concepts to seek and call out.
+                    </li>
+                </ul>
+                <p>
+                    Each of these either translates the position into a language-native form, or offloads the part the model can't do reliably,
+                    before asking the model to reason about it.
+                </p>
+
+                <h2>Taking it further</h2>
+
+                <p>
+                    The most relevant work I came across is <a href="https://arxiv.org/abs/2603.20510" target="_blank" rel="noopener">Tang et al.
+                    (2026)</a>, which formalizes a similar approach into a training pipeline. Their core insight mirrors what prompt engineering
+                    approximates: Stockfish knows the correct answer but can't articulate it; LLMs can articulate but can't evaluate. Their solution
+                    was to combine both — Stockfish provides ground-truth principal variations, an LLM generates natural language explanations using
+                    <em>Feigned Discovery Prompting</em> (reasoning as if the answer is unknown, rather than post-hoc justification). Feigned
+                    discovery forces the model to reason about its options until it arrives at the optimal move, resulting in a thorough and grounded
+                    chain of thought (rather than reasoning backwards from the solution and rationalizing incorrectly).
+                </p>
+
+                <p>
+                    Their results were impressive but constrained only to puzzles which have a single correct continuation. Real game positions
+                    remain a harder problem as there may not be an immediate tactical objective to pursue and the optimal strategy may not be clear
+                    yet.
+                </p>
+
+                <p>
+                    I plan on incorporating some of these ideas in the next iteration of the tool. If you're interested in collaborating, feel free
+                    to reach out.
+                </p>
+            </article>
+        </div>
+    </body>
+</html>

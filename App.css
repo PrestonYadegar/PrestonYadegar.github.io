@@ -73,6 +73,29 @@ a, .navbar-link:hover {
   left: 0;
 }
 
+.social-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  margin-inline: 3%;
+}
+
+.social-link {
+  display: inline-flex;
+  color: black;
+  transition: color 0.3s;
+}
+
+.social-link:hover {
+  color: var(--primary-color);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
 .page-title {
   font-size: 30px;
   font-weight: 600;
@@ -95,6 +118,48 @@ li {
   margin-top: 5px;
   margin-left: 20px;
   list-style-type: circle;
+}
+
+/* Blog index list */
+.post-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.post-list li {
+  margin-top: 18px;
+}
+
+.post-date {
+  display: block;
+  color: grey;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+/* Blog post */
+.post h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 4vh;
+  margin-bottom: 1vh;
+}
+
+.post p {
+  line-height: 1.6;
+}
+
+.post .post-date {
+  margin-top: -2vh;
+  margin-bottom: 4vh;
+}
+
+.post code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: #f2f2f2;
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
 .home-footer {
